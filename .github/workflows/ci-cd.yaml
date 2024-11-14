@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - echo Installing dependencies
+      - pip install flask pandas numpy
+  build:
+    commands:
+      - echo Building Docker image...
+      - docker build -t churn-prediction-api .
+  post_build:
+    commands:
+      - echo Running post-build tasks
+      - docker tag churn-prediction-api:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/churn-prediction-api:latest
+      - $(aws ecr get-login --no-include-email --region us-east-1)
+      - docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/churn-prediction-api:latest
+
+artifacts:
+  files:
+    - scripts/model_weights.npy
+    - scripts/model_bias.npy
+  discard-paths: yes
